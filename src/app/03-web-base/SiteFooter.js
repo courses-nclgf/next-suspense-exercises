@@ -1,11 +1,10 @@
-import React from 'react';
-import Link from 'next/link';
+import React, { Suspense } from "react";
+import Link from "next/link";
 
-import { getNavLinks } from '@/helpers/web-base-helpers';
+import { getCachedNavLinks } from "@/helpers/web-base-helpers";
+import Spinner from "@/components/Spinner";
 
 async function SiteFooter() {
-  const navLinks = await getNavLinks();
-
   return (
     <footer className="site-footer">
       <div className="logo-wrapper">
@@ -13,8 +12,7 @@ async function SiteFooter() {
           Webzip
         </Link>
         <p className="disclaimer">
-          Copyright © 2099 Webzip Inc. All Rights
-          Reserved.
+          Copyright © 2099 Webzip Inc. All Rights Reserved.
         </p>
       </div>
 
@@ -23,15 +21,9 @@ async function SiteFooter() {
           <h2>Navigation</h2>
           <nav>
             <ol>
-              {navLinks.map(
-                ({ slug, label, href }) => (
-                  <li key={slug}>
-                    <Link href={href}>
-                      {label}
-                    </Link>
-                  </li>
-                )
-              )}
+              <Suspense fallback={<Spinner />}>
+                <NavLinks />
+              </Suspense>
             </ol>
           </nav>
         </div>
@@ -43,9 +35,7 @@ async function SiteFooter() {
                 <Link href="">Terms of Use</Link>
               </li>
               <li>
-                <Link href="">
-                  Privacy Policy
-                </Link>
+                <Link href="">Privacy Policy</Link>
               </li>
               <li>
                 <Link href="">Contact</Link>
@@ -59,3 +49,13 @@ async function SiteFooter() {
 }
 
 export default SiteFooter;
+
+const NavLinks = async () => {
+  const navLinks = await getCachedNavLinks();
+
+  return navLinks.map(({ slug, label, href }) => (
+    <li key={slug}>
+      <Link href={href}>{label}</Link>
+    </li>
+  ));
+};
